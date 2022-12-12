@@ -1,0 +1,11 @@
+TARGET : 'isFraud'
+
+TRAIN_DATA : './data/train.csv'
+TEST_DATA : './data/test.csv'
+
+FEATURES : ['step', 'type', 'amount', 'oldBalanceOrig', 'newBalanceOrig', 'oldBalanceDest', 'newBalanceDest']
+LABEL_ENCODE_FEATURES : ['type']
+
+PIPELINE_NAME : 'xgb_v2'
+
+

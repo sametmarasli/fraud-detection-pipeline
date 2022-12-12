@@ -26,18 +26,7 @@ class SelectToModel(BaseTransformer):
         
         return X_transformed
 
-class SelectNotToModel(BaseTransformer):
-
-    def fit(self, X, y=None):
-        return self
-    
-    def transform(self, X):
-        X_transformed = X.copy()
-        X_transformed = X_transformed.query("type!='TRANSFER' & type!='CASH_OUT' ")
-
-        return X_transformed
-
-class DropColumns(BaseTransformer):
+class KeepFeatures(BaseTransformer):
 
     def __init__(self, features):
         self.features = features
@@ -47,7 +36,7 @@ class DropColumns(BaseTransformer):
 
     def transform(self, X):
         X_transformed = X.copy()
-        X_transformed = X.drop(self.features, axis = 1)
+        X_transformed = X[self.features]
         return X_transformed
 
 class CustomLabelEncoder(BaseTransformer):
