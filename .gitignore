@@ -1,7 +1,5 @@
 # data
 tutorials
-data
-models/
 notebooks/
 
 # Byte-compiled / optimized / DLL files
@@ -165,3 +163,13 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+models/current_model/model_20221215_1547.p
+models/archive/initial_model.p
+data/fraud_sample.csv
+data/stream_sample.p
+data/test_set.p
+data/train_set.p
+data/used_for_model_update/20221215_1527_new_samples.p
+legacy_data/stream_sample.p
+legacy_data/test_set.p
+legacy_data/raw_data/fraud.csv

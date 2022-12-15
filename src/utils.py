@@ -26,7 +26,7 @@ def load_new_training_data(path):
 			data.append(pd.DataFrame(json.loads(line)))
 	return pd.concat(data)
 
-def load_dataset(file_path, debug=None) -> pd.DataFrame:
+def load_data(file_path, debug=None) -> pd.DataFrame:
     """load csv data"""
     
     if debug:
@@ -37,25 +37,50 @@ def load_dataset(file_path, debug=None) -> pd.DataFrame:
     logging.info(f'Debug mode is off. Size of training data {df.shape[0]}')
     return df
 
-def initialize_data(step):
-    logging.info(f'initialize data train until step: {step}')
-
-    df = pd.read_csv('./data/fraud.csv')
-    df_train_model = df.query("type=='TRANSFER' | type=='CASH_OUT' ")
+def sample_data(file_path, step) -> pd.DataFrame:
+    df = pd.read_csv(file_path)
+    df[df['step']<step].to_csv('./data/fraud_sample.csv', index=None)
+    print(f'Sample is created below step {step}')
+    return
     
-    df_train_model = df_train_model.reset_index(drop=True).reset_index()
-    df_train_model = df_train_model.rename(columns = {'index':'id'})
+def initialize_data(**kwargs):
+    # logging.info(f'initialize data train until step: {step}')
 
-    df_train = df_train_model[df_train_model['step']<=step]
-    df_train = df_train.rename(columns={'oldbalanceOrg':'oldBalanceOrig', 'newbalanceOrig':'newBalanceOrig', \
-                            'oldbalanceDest':'oldBalanceDest', 'newbalanceDest':'newBalanceDest'})  
+    df = pd.read_csv(kwargs['path_data']).query("type=='TRANSFER' | type=='CASH_OUT' ")
 
-    df_test = df_train_model[df_train_model['step']>step]
-    df_test = df_test.rename(columns={'oldbalanceOrg':'oldBalanceOrig', 'newbalanceOrig':'newBalanceOrig', \
-                            'oldbalanceDest':'oldBalanceDest', 'newbalanceDest':'newBalanceDest'})  
+    df = df.reset_index(drop=True).reset_index()
 
-    df_train.to_csv('./data/train.csv', index=None)
-    df_test.to_csv('./data/test.csv', index=None)
+    df = df.rename(columns={
+        'index':'id',
+        'oldbalanceOrg':'oldBalanceOrig',
+        'newbalanceOrig':'newBalanceOrig',
+        'oldbalanceDest':'oldBalanceDest',
+        'newbalanceDest':'newBalanceDest'
+        })  
+
+    # df_train = df[df['step']<=step]
+    # df_test = df[df['step']>step]
+ 
+    # df_train.to_csv('./data/train.csv', index=None)
+    # df_test.to_csv('./data/test.csv', index=None)
+    from sklearn.model_selection import train_test_split
+    import pickle
+
+    X, y = df.drop('isFraud', axis=1), df['isFraud']
+    X_train, X_test, y_train, y_test = train_test_split(X,y, shuffle=True, 
+    test_size=.2,stratify=y )
+
+    X_train, X_stream, y_train, y_stream = train_test_split(X_train,y_train, shuffle=True, test_size=.2,stratify=y_train )
+
+    train_set = [X_train, y_train]
+    test_set = [X_test, y_test]
+    stream_sample = [X_stream, y_stream]
+
+    pickle.dump(test_set, open(os.getcwd() + kwargs['path_test_set'], "wb"))
+    pickle.dump(stream_sample, open(os.getcwd() + kwargs['path_stream_sample'], "wb"))
+
+
+    return X_train, y_train, X_test, y_test
 
 def store_data(message):
     message_file = './data/stream_data.txt'
@@ -67,7 +92,7 @@ def store_predictions(message, pipeline_name):
     with open(message_file, "a") as f:
         f.write("%s\n" % (json.dumps(message)))
 
-def stream_predict(message_data, model):
+def predict(message_data, model):
     data = pd.DataFrame(message_data, index=range(len(message_data)))
     output = {
         "id": list(data['id']), 
