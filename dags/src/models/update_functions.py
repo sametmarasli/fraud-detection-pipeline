@@ -69,21 +69,25 @@ def update_model(**kwargs):
 				
 				THRESHOLD = .5
 				probabilities = model.predict_proba(x_test)
+
 				f1_score_original = f1_score(y_test, probabilities[:, 1]>THRESHOLD)
-				
-				logging.info(f"F1 score of the original model {f1_score_original}")
+				logging.info(f'F1 score of the original model {f1_score_original}.')
+				precision_score_original = precision_score(y_test, probabilities[:, 1]>THRESHOLD)
+				logging.info(f'Precision score of the original model {precision_score_original}.')
+				recall_score_original = recall_score(y_test, probabilities[:, 1]>THRESHOLD)
+				logging.info(f'Recall score of the original model {recall_score_original}.')
 								
 				# update model with new data and evaluate score
 				
-				for old_data in os.listdir(os.getcwd()+kwargs['path_used_data']):
+				# for old_data in os.listdir(os.getcwd()+kwargs['path_used_data']):
 
-					old_data_i = pd.read_pickle(os.getcwd()+kwargs['path_used_data']+old_data)
-					x_old = old_data_i[0]
-					y_old = old_data_i[1]
+				# 	old_data_i = pd.read_pickle(os.getcwd()+kwargs['path_used_data']+old_data)
+				# 	x_old = old_data_i[0]
+				# 	y_old = old_data_i[1]
 
-					x_new_data = pd.concat((x_new, x_old))
-					y_new_data = pd.concat((y_new, y_old))
-					logging.info(f'data {old_data} is added to the original data')
+				# 	x_new_data = pd.concat((x_new, x_old))
+				# 	y_new_data = pd.concat((y_new, y_old))
+				# 	logging.info(f'data {old_data} is added to the original data')
 
 				x_new_data = pd.concat((x_train, x_new))
 				y_new_data = pd.concat((y_train, y_new))
@@ -106,20 +110,27 @@ def update_model(**kwargs):
 				logging.info('Fit the best estimator with all the data')
 				new_model = search.best_estimator_.fit(x_new_data, y_new_data)
 
-
 				probabilities = new_model.predict_proba(x_test)
+
 				f1_score_updated = f1_score(y_test, probabilities[:, 1]>THRESHOLD)
-				logging.info(f"F1 score of the updated model {f1_score_updated}")
+				logging.info(f'F1 score of the updated model {f1_score_original}.')
+				precision_score_updated = precision_score(y_test, probabilities[:, 1]>THRESHOLD)
+				logging.info(f'Precision score of the updated model {precision_score_original}.')
+				recall_score_updated = recall_score(y_test, probabilities[:, 1]>THRESHOLD)
+				logging.info(f'Recall score of the updated model {recall_score_original}.')
 
 				# log results to MLFlow
 
-				
-				mlflow.log_metric('test accuracy - current model', f1_score_original)
-				mlflow.log_metric('test accuracy - updated model', f1_score_updated)
 
+				mlflow.log_metric('F1 score', f1_score_updated)
+				mlflow.log_metric('Precision score', precision_score_updated)
+				mlflow.log_metric('Recall score', recall_score_updated)
 				
 				mlflow.log_metric('Number of samples used for original model', x_train.shape[0])
 				mlflow.log_metric('Number of new samples used for updated model', x_new.shape[0])
+
+				mlflow.log_metric('Train size', x_new_data.shape[0])
+
 
 				# if the updated model outperforms the current model -> move current version to archive and promote the updated model
 

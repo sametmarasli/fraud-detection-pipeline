@@ -10,15 +10,15 @@ PATH_STREAM_SAMPLE = "/data/stream_sample.p"
 
 args = {
     'owner': 'airflow',
-    'start_date': airflow.utils.dates.days_ago(1),      # this in combination with catchup=False ensures the DAG being triggered from the current date onwards along the set interval
+    'start_date': airflow.utils.dates.days_ago(5),      # this in combination with catchup=False ensures the DAG being triggered from the current date onwards along the set interval
     'provide_context': True,                            # this is set to True as we want to pass variables on from one task to another
 }
 
 dag = DAG(
-    dag_id='stream_DAG1883',
+    dag_id='stream_DAG_1881',
     default_args=args,
-    # schedule_interval= timedelta(minutes=5),      # set interval
     schedule_interval= '@once',      # set interval
+    # schedule_interval= '@once',      # set interval
 	catchup=False,                     # indicate whether or not Airflow should do any runs for intervals between the start_date and the current date that haven't been run thus far
 )
 

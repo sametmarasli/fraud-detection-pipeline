@@ -25,9 +25,10 @@ args = {
 }
 
 dag = DAG(
-    dag_id='update_DAG1883',
+    dag_id='update_DAG_1881',
     default_args=args,
 	schedule_interval='@once',        # set interval
+    # schedule_interval= timedelta(minutes=10),      # set interval
 	catchup=False,                    # indicate whether or not Airflow should do any runs for intervals between the start_date and the current date that haven't been run thus far
 )
 

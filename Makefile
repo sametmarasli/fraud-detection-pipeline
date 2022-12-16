@@ -6,8 +6,12 @@ docker-up-service:
 docker-up:
 	docker-compose -f  docker-compose-fraud.yml up --build -d 
 
+local-up:
+	docker-compose -f  docker-compose-local.yml up --build -d 
+
 flask-up:
 	docker-compose -f  docker-compose-flask.yml up --build -d
+
 flask-bash:
 	docker exec -ti flask_container bash
 

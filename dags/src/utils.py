@@ -9,7 +9,4 @@ def init_logger():
 
 
 
-# def load_pipeline(pipeline_name) -> Pipeline :
-#     """Load the pipeline"""
-#     pipeline_path = os.path.join('./models',pipeline_name)
-#     return joblib.load(pipeline_path, ==)
+

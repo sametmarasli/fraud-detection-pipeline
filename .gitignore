@@ -2,6 +2,7 @@
 tutorials
 notebooks/
 old/
+archive_dags/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -173,3 +174,9 @@ data/used_for_model_update/20221215_1527_new_samples.p
 legacy_data/stream_sample.p
 legacy_data/test_set.p
 legacy_data/raw_data/fraud.csv
+models/current_model/model_20221216_1405.p
+models/archive/model_20221216_1353.p
+data/used_for_model_update/20221216_1404_new_samples.p
+data/used_for_model_update/20221216_1353_new_samples.p
+data/to_use_for_model_update/20221216_0104_new_samples.p
+notebooks/eda.ipynb
