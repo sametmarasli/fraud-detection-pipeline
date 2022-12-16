@@ -19,8 +19,7 @@ def get_data_from_kafka(**kwargs):
     consumer = KafkaConsumer(
         kwargs["topic"],                                # specify topic to consume from
         bootstrap_servers=[kwargs["client"]],
-        consumer_timeout_ms=3000,
-        api_version=(0,10,2),                       # break connection if the consumer has fetched anything for 3 secs (e.g. in case of an empty topic)
+        consumer_timeout_ms=3000,                       # break connection if the consumer has fetched anything for 3 secs (e.g. in case of an empty topic)
         auto_offset_reset='earliest',                   # automatically reset the offset to the earliest offset (should the current offset be deleted or anything)
         enable_auto_commit=True,                        # offsets are committed automatically by the consumer
         #group_id='my-group',
@@ -40,8 +39,8 @@ def get_data_from_kafka(**kwargs):
             xs.extend(x)
             ys.extend(y)
 
-        x_train = pickle.load(open(os.getcwd() + kwargs['path_train_set'], "rb"))[0]
-        Xs = pd.DataFrame(xs, columns=x_train.columns)
+        x_sample = pickle.load(open(os.getcwd() + kwargs['path_stream_sample'], "rb"))[0]
+        Xs = pd.DataFrame(xs, columns=x_sample.columns)
         ys = pd.Series(ys)
         
         logging.info(f"Messages are collected.")
@@ -68,6 +67,9 @@ def load_data(**kwargs):
             train_set= pickle.load(open(os.getcwd()+kwargs['path_train_set'], "rb"))
             test_set = pickle.load(open(os.getcwd()+kwargs['path_test_set'], "rb"))
 
+            # print(test_set[0].head())
+            # print(train_set[0].head())
+
             logging.info('data loaded')
             return [train_set, test_set, new_samples]
 
@@ -75,4 +77,32 @@ def load_data(**kwargs):
             logging.info('no data found')
 
 
+
+if __name__ == "__main__":
+    CLIENT = 'localhost:9092'
+    TOPIC = 'TopicA'
+    PATH_NEW_DATA = '/data/to_use_for_model_update/'
+    PATH_USED_DATA = '/data/used_for_model_update/'
+    PATH_DATA = "/data/fraud_sample.csv"
+    PATH_STREAM_SAMPLE = "/data/stream_sample.p"
+    PATH_CURRENT_MODEL = '/models/current_model/'
+    PATH_TEST_SET = '/data/test_set.p'
+    PATH_TRAIN_SET = '/data/train_set.p'
+
+    logging.basicConfig(level=logging.INFO)
+    input_dict = {
+        "client" : CLIENT,
+        "topic" : TOPIC,
+        "path_new_data" : PATH_NEW_DATA,
+        "path_used_data" : PATH_USED_DATA,
+        "path_data" : PATH_DATA,
+        "path_stream_sample" : PATH_STREAM_SAMPLE,
+        "path_current_model" : PATH_CURRENT_MODEL,
+        "path_test_set" : PATH_TEST_SET,
+        "path_train_set": PATH_TRAIN_SET
+
+    }
+
+    get_data_from_kafka(**input_dict)
+    load_data(**input_dict)
 

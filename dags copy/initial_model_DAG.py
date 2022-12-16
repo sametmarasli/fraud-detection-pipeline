@@ -8,7 +8,6 @@ from src.models.initial_model_functions import load_preprocess, fit_model
 PATH_TRAIN_SET = "/data/train_set.p"
 PATH_STREAM_SAMPLE = "/data/stream_sample.p"
 PATH_TEST_SET = "/data/test_set.p"
-PATH_TRAIN_SET = "/data/train_set.p"
 PATH_DATA = "/data/fraud_sample.csv"
 INITIAL_MODEL_PATH = '/models/current_model/initial_model.p'
 
@@ -20,7 +19,7 @@ args = {
 }
 
 dag = DAG(
-    dag_id='initial_model_DAG9',
+    dag_id='initial_model_DAG2',
     default_args=args,
     schedule_interval= '@once',             # set interval
 	catchup=False,                          # indicate whether or not Airflow should do any runs for intervals between the start_date and the current date that haven't been run thus far
@@ -32,8 +31,7 @@ task1 = PythonOperator(
     python_callable=load_preprocess,        # function to be executed
     op_kwargs={'path_data' : PATH_DATA,
                'path_stream_sample': PATH_STREAM_SAMPLE,        # input arguments
-			   'path_test_set': PATH_TEST_SET,
-			   'path_train_set': PATH_TRAIN_SET,},
+			   'path_test_set': PATH_TEST_SET},
     dag=dag,
 )
 

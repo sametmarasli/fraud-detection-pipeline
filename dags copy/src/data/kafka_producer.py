@@ -18,9 +18,11 @@ def encode_to_json(x_train, y_train):
 
 def generate_stream(**kwargs):
 
-	producer = KafkaProducer(bootstrap_servers=['kafka:9092'],  api_version=(0,10,2), value_serializer=lambda x: dumps(x).encode('utf-8'))
+	producer = KafkaProducer(bootstrap_servers=['localhost:9092'],                              # set up Producer
+                         value_serializer=lambda x: dumps(x).encode('utf-8'))
 
 	stream_sample = pickle.load(open(os.getcwd() + kwargs['path_stream_sample'], "rb"))       # load stream sample file
+	# stream_sample = pickle.load(open('./data/stream_sample.p', "rb"))       # load stream sample file
 
 	x_new = stream_sample[0]
 	y_new = stream_sample[1]
@@ -38,4 +40,13 @@ def generate_stream(**kwargs):
 	logging.info(f'{shape_sent} transactions and {frauds_sent} frauds sent')
 	producer.close()
 
+if __name__ == "__main__":
+	PATH_STREAM_SAMPLE = "/data/stream_sample.p"
 
+	logging.basicConfig(level=logging.INFO)
+	input_dict = {
+		"path_stream_sample" : PATH_STREAM_SAMPLE,
+
+	}
+
+	generate_stream(**input_dict)

@@ -1,13 +1,18 @@
 service := airflow
 
 docker-up-service:
-	docker-compose -f docker-compose-project.yml up --build $(service)
+	docker-compose -f docker-compose-fraud.yml up --build $(service)
 
 docker-up:
-	docker-compose -f docker-compose-project.yml up --build -d
+	docker-compose -f  docker-compose-fraud.yml up --build -d 
+
+flask-up:
+	docker-compose -f  docker-compose-flask.yml up --build -d
+flask-bash:
+	docker exec -ti flask_container bash
 
 docker-build:
-	docker-compose -f docker-compose-project.yml build
+	docker-compose -f docker-compose-fraud.yml build
 
 docker-down:
 	docker-compose down

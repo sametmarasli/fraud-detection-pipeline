@@ -1,14 +1,15 @@
 import pandas as pd
 import os
+from sklearn.model_selection import train_test_split
 import pickle
 import logging
-import joblib 
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import f1_score, precision_score, recall_score
-from sklearn.model_selection import  GridSearchCV, train_test_split
 from xgboost.sklearn import XGBClassifier
-import src.models.pipeline_config as pipeline_config
-from src.models.transformers import (KeepFeatures, CustomLabelEncoder, AmountVsOldAndNewBalanceOrig, AmountVsOldAndNewBalanceDest)
+from dags.src.models.transformers import (KeepFeatures, CustomLabelEncoder, AmountVsOldAndNewBalanceOrig, AmountVsOldAndNewBalanceDest)
+import dags.src.models.pipeline_config as pipeline_config
+from sklearn.model_selection import  GridSearchCV
+import joblib 
+from sklearn.metrics import f1_score, precision_score, recall_score
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -40,7 +41,6 @@ def load_preprocess(**kwargs):
     logging.info(f'Dimensions train: {y_train.shape}, test:{y_test.shape}, strea:{y_stream.shape}')
     logging.info(f'{sum(y_train)} frauds in the train set.')
     logging.info(f'Data is loaded successfully')
-    
     return X_train, y_train, X_test, y_test
 
 def construct_model():
@@ -58,14 +58,17 @@ def construct_model():
 def fit_model(**kwargs):
 
 	# fit model along preprocessed data and constructed model framework
-    ti = kwargs['ti']
-    loaded = ti.xcom_pull(task_ids='load_preprocess')
+    # ti = kwargs['ti']
+    # loaded = ti.xcom_pull(task_ids='load_preprocess')
+    loaded_train = pd.read_pickle('./data/train_set.p')
+    loaded_test = pd.read_pickle('./data/test_set.p')
+    # loaded_test = pd.read_pickle('./legacy_data/stream_sample.p')
     
     # logging.info('variables successfully fetched from previous task')
-    X_train = loaded[0]
-    y_train = loaded[1]
-    X_test = loaded[2]
-    y_test = loaded[3]
+    X_train = loaded_train[0]
+    y_train = loaded_train[1]
+    X_test = loaded_test[0]
+    y_test = loaded_test[1]
     
     # initialize the model
     model_pipeline = construct_model()
@@ -91,3 +94,25 @@ def fit_model(**kwargs):
     logging.info(f'F1 score of the initial model {f1_score_original}.')
     
 				
+
+if __name__ == "__main__":
+    PATH_STREAM_SAMPLE = "/data/stream_sample.p"
+    PATH_TEST_SET = "/data/test_set.p"
+    PATH_TRAIN_SET = "/data/train_set.p"
+    PATH_DATA = "/data/fraud_sample.csv"
+    INITIAL_MODEL_PATH = '/models/current_model/initial_model.p'
+
+
+    logging.basicConfig(level=logging.INFO)
+    INITIAL_MODEL_PATH = '/models/current_model/initial_model.p'
+    op_kwargs={
+    'initial_model_path': INITIAL_MODEL_PATH,
+    'path_data':PATH_DATA,
+    'path_train_set':PATH_TRAIN_SET,
+    'path_test_set':PATH_TEST_SET,
+    'path_stream_sample':PATH_STREAM_SAMPLE,
+    
+    }
+
+    load_preprocess(**op_kwargs)
+    fit_model(**op_kwargs)

@@ -1,8 +1,8 @@
 
 import airflow
+
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-from datetime import timedelta
 
 from src.data.kafka_producer import generate_stream
 
@@ -15,10 +15,9 @@ args = {
 }
 
 dag = DAG(
-    dag_id='stream_DAG1883',
+    dag_id='stream_DAG',
     default_args=args,
-    # schedule_interval= timedelta(minutes=5),      # set interval
-    schedule_interval= '@once',      # set interval
+    schedule_interval= '@hourly',      # set interval
 	catchup=False,                     # indicate whether or not Airflow should do any runs for intervals between the start_date and the current date that haven't been run thus far
 )
 

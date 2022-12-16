@@ -2,13 +2,15 @@
 from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
+import os
 
 
 app = Flask(__name__)
-pipeline = joblib.load("./models/current_model/model_20221215_1547.p")
+
+pipeline = joblib.load( './model/' +  os.listdir('./model/')[0])
 
 @app.route('/predict',methods=['POST'])
-def predict(pipeline):
+def predict():
     
     data = request.get_json(force=True)
     data = pd.DataFrame([data.values()], columns= data.keys())
@@ -20,5 +22,6 @@ def predict(pipeline):
     # output = 'a'
     return jsonify({'Probability of fraud': f'% {output}'})
 
+
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(host='0.0.0.0',debug=True,port='5000')

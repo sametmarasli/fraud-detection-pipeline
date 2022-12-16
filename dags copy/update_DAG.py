@@ -1,22 +1,29 @@
 
 import airflow
+
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 
 from src.data.data_functions import get_data_from_kafka, load_data
 from src.models.update_functions import load_current_model, update_model, data_to_archive
 from src.preprocessing.preprocessing_functions import preprocessing
-from datetime import timedelta
 
 CLIENT = 'kafka:9092'
 TOPIC = 'TopicA'
+
 PATH_NEW_DATA = '/data/to_use_for_model_update/'
 PATH_USED_DATA = '/data/used_for_model_update/'
-PATH_TRAIN_SET = "/data/train_set.p"
 PATH_TEST_SET = '/data/test_set.p'
+
 PATH_INITIAL_MODEL = '/models/initial_model'
 PATH_CURRENT_MODEL = '/models/current_model/'
+
 PATH_MODEL_ARCHIVE = '/models/archive/'
+
+BATCH_SIZE = 128
+NUM_CLASSES = 10
+EPOCHS = 4
+
 
 args = {
     'owner': 'airflow',
@@ -25,20 +32,19 @@ args = {
 }
 
 dag = DAG(
-    dag_id='update_DAG1883',
+    dag_id='update_DAG',
     default_args=args,
-	schedule_interval='@once',        # set interval
+	schedule_interval='@daily',        # set interval
 	catchup=False,                    # indicate whether or not Airflow should do any runs for intervals between the start_date and the current date that haven't been run thus far
 )
 
 
 task1 = PythonOperator(
     task_id='get_data_from_kafka',
-    python_callable=get_data_from_kafka,            # function called to get data from the Kafka topic and store it
+    python_callable=get_data_ from_kafka,            # function called to get data from the Kafka topic and store it
     op_kwargs={'path_new_data': PATH_NEW_DATA,
-               'path_train_set':PATH_TRAIN_SET,
                'client': CLIENT,
-               'topic': TOPIC },
+               'topic': TOPIC},
     dag=dag,
 )
 
@@ -46,9 +52,7 @@ task2 = PythonOperator(
     task_id='load_data',
     python_callable=load_data,                      # function called to load data for further processing
     op_kwargs={'path_new_data': PATH_NEW_DATA,
-               'path_train_set': PATH_TRAIN_SET,
-               'path_test_set': PATH_TEST_SET
-               },
+               'path_test_set': PATH_TEST_SET},
     dag=dag,
 )
 
@@ -62,9 +66,11 @@ task3 = PythonOperator(
 task4 = PythonOperator(
     task_id='update_model',
     python_callable=update_model,                       # function called to update model
-    op_kwargs = {'path_current_model': PATH_CURRENT_MODEL,
+    op_kwargs = {'num_classes': NUM_CLASSES,
+                 'epochs': EPOCHS,
+                 'batch_size': BATCH_SIZE,
+                 'path_current_model': PATH_CURRENT_MODEL,
                  'path_model_archive': PATH_MODEL_ARCHIVE,
-                 'path_used_data' : PATH_USED_DATA,
                  },
     dag=dag,
 )
